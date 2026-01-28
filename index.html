@@ -2,24 +2,118 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>HA Remote</title>
-  <link rel="stylesheet" href="style.css">
+  <title>WS Bridge Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 20px;
+    }
+
+    .status {
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    pre {
+      background: #020617;
+      padding: 10px;
+      max-height: 300px;
+      overflow: auto;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Luz habitación</h2>
+  <h2>🔌 WS Bridge → Home Assistant</h2>
 
-    <label class="switch">
-      <input type="checkbox" id="toggle">
-      <span class="slider"></span>
-    </label>
+  <div class="status" id="status">🔴 Desconectado</div>
 
-    <p id="status">Desconectado</p>
-  </div>
+  <button onclick="connect()">Conectar</button>
+  <button onclick="turnOn()">Encender switch</button>
+  <button onclick="turnOff()">Apagar switch</button>
 
+  <h3>📥 Logs</h3>
   <pre id="log"></pre>
 
-  <script src="app.js"></script>
+  <script>
+    let ws;
+    const logEl = document.getElementById("log");
+    const statusEl = document.getElementById("status");
+
+    function log(msg) {
+      logEl.textContent += msg + "\n";
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function connect() {
+      ws = new WebSocket("wss://c558e2d08663.ngrok-free.app");
+
+      ws.onopen = () => {
+        statusEl.textContent = "🟢 Conectado";
+        log("✅ Conectado al servidor WS");
+
+        // 🔐 Autenticación
+        ws.send(JSON.stringify({
+          type: "auth",
+          token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJlYzY0OTg1ZWEzOWE0ZmFkOGI4ZDJmYmIyMjFhNmM4OCIsImlhdCI6MTc2OTUzMTEwOSwiZXhwIjoyMDg0ODkxMTA5fQ.fBFH_4POEB5QWl9rcN1MjaGB8tBgiBNreVMHADtLBVo"
+        }));
+      };
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        log("⬇️ " + JSON.stringify(data, null, 2));
+      };
+
+      ws.onclose = () => {
+        statusEl.textContent = "🔴 Desconectado";
+        log("❌ WebSocket cerrado");
+      };
+
+      ws.onerror = (err) => {
+        log("⚠️ Error WS");
+        console.error(err);
+      };
+    }
+
+    // 🔼 EVENTOS HACIA HOME ASSISTANT
+    function turnOn() {
+      ws.send(JSON.stringify({
+        type: "call_service",
+        domain: "switch",
+        service: "turn_on",
+        data: {
+          entity_id: "switch.it_hab_2_2"
+        }
+      }));
+    }
+
+    function turnOff() {
+      ws.send(JSON.stringify({
+        type: "call_service",
+        domain: "switch",
+        service: "turn_off",
+        data: {
+          entity_id: "switch.it_hab_2_2"
+        }
+      }));
+    }
+  </script>
 </body>
 </html>
