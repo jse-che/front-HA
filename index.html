@@ -2,13 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>HA Remote Control</title>
+  <title>HA Remote</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Home Assistant Remote</h1>
 
-  <button onclick="turnOn()">Encender</button>
-  <button onclick="turnOff()">Apagar</button>
+  <div class="card">
+    <h2>Luz habitación</h2>
+
+    <label class="switch">
+      <input type="checkbox" id="toggle">
+      <span class="slider"></span>
+    </label>
+
+    <p id="status">Desconectado</p>
+  </div>
 
   <pre id="log"></pre>
 
