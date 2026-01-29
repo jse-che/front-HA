@@ -48,6 +48,10 @@
   <button onclick="connect()">Conectar</button>
   <button onclick="turnOn()">Encender switch</button>
   <button onclick="turnOff()">Apagar switch</button>
+  <button onclick="OnAire()">Encender aire</button>
+  <button onclick="OffAire()">Apagar aire</button>
+
+
 
   <h3>Logs</h3>
   <pre id="log"></pre>
@@ -111,6 +115,28 @@
         service: "turn_off",
         data: {
           entity_id: "switch.swlab"
+        }
+      }));
+    }
+
+    function OnAire() {
+      ws.send(JSON.stringify({
+        type: "call_service",
+        domain: "climate",
+        service: "set_hvac_mode",
+        data: {
+          entity_id: "climate.thermolab"
+        }
+      }));
+    }
+
+    function OffAire() {
+      ws.send(JSON.stringify({
+        type: "call_service",
+        domain: "climate",
+        service: "set_hvac_mode",
+        data: {
+          entity_id: "climate.thermolab"
         }
       }));
     }
